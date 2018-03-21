@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+
+    <context:property-placeholder location="classpath:config.properties"/>
+
+    <context:component-scan base-package="mq"/>
+
+    <!--mq服务器连接对象-->
+    <bean id="activeMqConnectionFactoryDecoration" class="mq.ActiveMqConnectionFactoryDecoration">
+        <property name="activeMQConnectionFactory">
+            <bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory"/>
+        </property>
+        <property name="brokerURL" value="${brokerURL}"/>
+        <property name="userName" value="${userName}"/>
+        <property name="password" value="${password}"/>
+        <property name="maxConntections" value="${maxConnections}"/>
+
+    </bean>
+
+    <!--Spring 提供的消息模板-->
+    <bean id="springJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="activeMqConnectionFactoryDecoration"/>
+    </bean>
+
+
+    <!--定义一个队列的地址-->
+    <bean id="queue" class="org.apache.activemq.command.ActiveMQQueue">
+        <constructor-arg index="0" value="com.getthrough.spring_activemq.queue"/>
+    </bean>
+
+    <!--消息生产者-->
+    <bean id="producer1" class="mq.ActiveMqSender" name="producer1">
+        <!--将引用的模板和队列地址注入到助手类的字段中-->
+        <property name="jmsTemplate" ref="springJmsTemplate"/>
+        <property name="destination" ref="queue"/>
+    </bean>
+
+    <!--消息监听器-->
+    <bean id="queueMessageListener" class="mq.listener.QueueMessageListener"/>
+
+    <!--消息消费者-->
+    <bean id="consumer1" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="activeMqConnectionFactoryDecoration"/>
+        <property name="destination" ref="queue"/>
+        <property name="messageListener" ref="queueMessageListener"/>
+    </bean>
+
+</beans>

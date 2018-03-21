@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.4"
+         xmlns="http://java.sun.com/xml/ns/j2ee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
+        http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+  <display-name>Archetype Created Web Application</display-name>
+
+  <!--指定 spring 配置文件位置-->
+  <context-param>
+    <!--这个提示的前提是在 pom 文件中加入了 spring-web 的依赖-->
+    <param-name>contextConfigLocation</param-name>
+    <param-value>classpath:spring/spring-root.xml</param-value>
+  </context-param>
+  <!--监听器,用于启动 spring 容器-->
+  <listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+  <!--监听器,用于启动连接 mq -->
+  <listener>
+    <listener-class>mq.listener.StarterListener</listener-class>
+  </listener>
+
+</web-app>
